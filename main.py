@@ -6,10 +6,17 @@ import random
 import copy
 import basicmath
 import time
+from settings import SettingsWindow
+import configparser
+import os.path
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 #Runs on Python 3.6.1
-#TODO: Problem generation, Putting those problems in a Session, Follow style guides, Settings, Question types
+#TODO: Problem generation, Putting those problems in a Session, Follow style guides, Settings, Question types, Enabling Questions
 
+
+root = Tk()
 
 class SessionButton:
     def __init__(self, master):
@@ -58,7 +65,9 @@ class Session:
         self.ans_num = 0
         self.correct_num = 0
         self.total_time = 0.0
+        self.correct_time = 0.0
     #May be useful
+        basicmath.update_config()
     def set_problem(self, problem):
         self.problem = problem
     def display_problem(self):
@@ -75,7 +84,7 @@ class Session:
             self.problem.evaluate_answer(s)
             #print("the yes")
         except ValueError:
-            print("Error")
+            print("Invalid Answer")
             pass
         if self.problem.correct:
             print("True")
@@ -86,7 +95,7 @@ class Session:
         self.answer.delete(0, END)
         self.new_problem()
     def new_problem(self):
-        self.set_problem(messAround())
+        self.set_problem(make_question())
         self.display_problem()
         self.start = time.time()
     def destroy_problem(self):
@@ -96,6 +105,7 @@ class Session:
             self.ans_num += 1
             if self.problem.correct:
                 self.correct_num += 1
+                self.correct_time += self.endtime - self.start
             self.total_time += self.endtime - self.start
     def print_summary(self):
         print()
@@ -103,9 +113,14 @@ class Session:
         print(str(self.correct_num) + " / " + str(self.ans_num))
         if self.ans_num > 0:
             print("Average time:")
-            print(str(self.total_time / self.ans_num))
+            print(str(self.total_time / self.ans_num) + "s")
         else:
             print("No questions answered")
+        if self.correct_num > 0:
+            print("Average time for correct answers:")
+            print(str(self.correct_time / self.correct_num) + "s")
+        elif self.ans_num > 0:
+            print("No correct answers")
     def end(self):
         self.print_summary()
         self.destroy_problem()
@@ -113,14 +128,28 @@ class Session:
         self.master.title = self.old_title
 
 #Creates a random problem
-def messAround():
+"""
+Creates a random problem from the list
+"""
+def make_question():
     list = [basicmath.addition_problem, basicmath.subtraction_problem, basicmath.multiplication_problem, basicmath.integer_division_problem]
 
     return list[random.randint(0,len(list)-1)]()
 
-#Test function
-def dothing():
-    print("A thing was did")
+def make_default_config():
+    config['Addition'] = {'min': 10, 'max': 100}
+    config['Subtraction'] = {'min': 10, 'max': 100}
+    config['Multiplication'] = {'min': 10, 'max': 50}
+    config['Division'] = {'min': 10, 'max': 50}
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+
+#TODO: RENAME
+"""
+Opens the settings window
+"""
+def open_settings():
+    settings = SettingsWindow(root)
 
 """
 def makething():
@@ -128,15 +157,13 @@ def makething():
     if not session:
         session = True
         top = Toplevel(root)
-
 """
 
 def main():
-    root = Tk()
     root.option_add('*tearOff', FALSE)
     #root.title("Test thing")
     #win = Toplevel(root)
-    root.title("Why")
+    root.title("Math Stuff")
     mainfram = ttk.Frame(root, padding="4 12")
     menubar = Menu(root)
     menu_settings = Menu(menubar)
@@ -145,10 +172,13 @@ def main():
     button = SessionButton(root)
     #test = Session(root)
     #Lel
-    menu_settings.add_command(label='Do Thing', command=dothing)
+    menu_settings.add_command(label='Do Thing', command=open_settings)
     root['menu'] = menubar
     root.mainloop()
+    #settings = SettingsWindow(root)
 
 
 if __name__ == "__main__":
+    if not os.path.isfile('config.ini'):
+        make_default_config()
     main()
