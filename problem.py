@@ -1,19 +1,22 @@
-from abc import ABC, abstractmethod
-
 """
+Problem
 """
 class Problem:
-    def __init__(self, question, answer):
+    def __init__(self, question, answer, category):
         self.question = question
         self.answer = answer
         self.answered = False
         self.correct = False
+        self.category = category
     def evaluate_answer(self, answer):
-        if answer == self.answer and not self.answered:
-            self.correct = True
-
-        if type(answer) is str and type(self.answer) is int:
-            answer = int(answer)
-            if answer == self.answer and not self.answered:
+        if not self.answered:
+            if type(answer) is str and type(self.answer) is int:
+                try:
+                    answer = int(answer)
+                    if answer == self.answer:
+                        self.correct = True
+                except ValueError:
+                    pass
+            if answer == self.answer:
                 self.correct = True
         self.answered = True
