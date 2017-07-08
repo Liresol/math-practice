@@ -142,7 +142,8 @@ Session.vim
 # auto-generated tag files
 tags
 
-#Config file created by the settings
+#Files created by the program during testing
 config.ini
+*.json
 
 # End of https://www.gitignore.io/api/vim,macos,python

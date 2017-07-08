@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 session = False
 from problem import Problem
+import stats
 import random
 import copy
 import basicmath
@@ -49,6 +50,7 @@ class SessionButton:
 
 class Session:
     def __init__(self, master):
+        self.stats = stats.Stats()
         self.master = master
         #self.frame = Frame(self.master)
         self.frame = ttk.Frame(self.master)
@@ -102,6 +104,7 @@ class Session:
         self.label1.destroy()
     def tally_answers(self):
         if self.problem.answered:
+            self.stats.add_time(self.problem.category,self.endtime-self.start, self.problem.correct)
             self.ans_num += 1
             if self.problem.correct:
                 self.correct_num += 1
@@ -126,6 +129,8 @@ class Session:
         self.destroy_problem()
         self.frame.destroy()
         self.master.title = self.old_title
+        stats.StatsWriter.write_session(self.stats)
+        self.stats = stats.Stats()
 
 #Creates a random problem
 """
