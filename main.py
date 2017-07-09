@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 session = False
 from problem import Problem
 import random
@@ -9,6 +10,7 @@ import time
 from settings import SettingsWindow
 import configparser
 import os.path
+import stats
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -66,6 +68,7 @@ class Session:
         self.correct_num = 0
         self.total_time = 0.0
         self.correct_time = 0.0
+        self.stats = stats.Stats()
     #May be useful
         basicmath.update_config()
     def set_problem(self, problem):
@@ -102,6 +105,7 @@ class Session:
         self.label1.destroy()
     def tally_answers(self):
         if self.problem.answered:
+            self.stats.add_time(self.problem.category, self.endtime - self.start, self.problem.correct)
             self.ans_num += 1
             if self.problem.correct:
                 self.correct_num += 1
@@ -125,6 +129,7 @@ class Session:
         self.print_summary()
         self.destroy_problem()
         self.frame.destroy()
+        stats.StatsWriter.write_session(self.stats)
         self.master.title = self.old_title
 
 #Creates a random problem
@@ -150,14 +155,11 @@ Opens the settings window
 """
 def open_settings():
     settings = SettingsWindow(root)
-
-"""
-def makething():
-    global session
-    if not session:
-        session = True
-        top = Toplevel(root)
-"""
+def open_stats():
+    s = stats.StatsWindow(root)
+def delete_stats():
+    if messagebox.askokcancel("Delete", "Delete all stats?"):
+        stats.StatsWriter.delete_stats()
 
 def main():
     root.option_add('*tearOff', FALSE)
@@ -167,12 +169,16 @@ def main():
     mainfram = ttk.Frame(root, padding="4 12")
     menubar = Menu(root)
     menu_settings = Menu(menubar)
+    menu_stats = Menu(menubar)
     menubar.add_cascade(menu=menu_settings, label='Settings')
+    menubar.add_cascade(menu=menu_stats, label='Stats')
     root.resizable(False,False)
     button = SessionButton(root)
     #test = Session(root)
     #Lel
     menu_settings.add_command(label='Do Thing', command=open_settings)
+    menu_stats.add_command(label='Open Stats', command=open_stats)
+    menu_stats.add_command(label='Delete Stats', command=delete_stats)
     root['menu'] = menubar
     root.mainloop()
     #settings = SettingsWindow(root)

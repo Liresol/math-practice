@@ -1,5 +1,6 @@
 """
-Problem
+Problem class. Contains a question, an answer, and a
+question category.
 """
 class Problem:
     def __init__(self, question, answer, category):
